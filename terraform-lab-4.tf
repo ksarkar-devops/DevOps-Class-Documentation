@@ -48,3 +48,10 @@ resource "azurerm_storage_share" "example" {
   storage_account_name = azurerm_storage_account.storage.name
   quota              = 50
 }
+
+resource "azurerm_storage_container" "static" {
+  name                  = "$web"
+  storage_account_name  = azurerm_storage_account.static.name
+  container_access_type = "blob"
+}
+
