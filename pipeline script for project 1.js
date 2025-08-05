@@ -15,7 +15,7 @@ pipeline {
 				sh 'ls -l'
             }
         }
-        stage('Build') {
+        stage('Project Build') {
             steps {
                 echo 'Build'
 				sh 'mvn clean package'
@@ -28,10 +28,19 @@ pipeline {
                 sh 'docker build -t java_proj .'
             }
         }
+        stage('Docker Login') {
+            steps {
+                echo 'Docker Login'
+				withCredentials([usernamePassword(credentialsId: 'acr-login', usernameVariable: 'ACR_USER', passwordVariable: 'ACR_PASS')]) {
+                    sh '''
+                        echo "$ACR_PASS" | docker login ksarkar23987.azurecr.io --username "$ACR_USER" --password-stdin
+                    '''
+                }
+            }
+        }
 		stage('ACR Push') {
             steps {
                 echo 'ACR Push'
-				sh 'docker login ksarkar23987.azurecr.io --username ksarkar23987 --password xdS3VjuttNRMo8HA/Dg7jLY1/FexB8l+SMmiuWZouf+ACRDHTC/y'
                 sh 'docker tag java_proj ksarkar23987.azurecr.io/test-repo:test-tag'
                 sh 'docker push ksarkar23987.azurecr.io/test-repo:test-tag'
             }
