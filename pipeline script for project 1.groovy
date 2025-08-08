@@ -2,12 +2,15 @@ pipeline {
     agent any
     
     environment {
-        IMAGE_NAME = 'test-repo'
-        IMAGE_TAG = 'test-tag'
-        CLUSTER_NAME = 'kube-cluster'
-        NAMESPACE = 'default'
-    }
-    
+    IMAGE_NAME = 'java-app'
+    IMAGE_TAG = 'test-tag'
+    ACR_NAME = 'ksarkar23987'
+    ACR_REPO = 'test-repo'
+    CLUSTER_NAME = 'kube-cluster'
+    NAMESPACE = 'default'
+    ACR_LOADBALANCER = 'java-app-lb'
+}
+
     stages {
         stage('Clone repo') {
             steps {
@@ -28,7 +31,7 @@ pipeline {
 		stage('Docker build') {
             steps {
                 sh 'cd /var/lib/jenkins/workspace/DeployJavaProject/'
-				sh 'docker build -t javaproj .'
+				sh 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .'
             }
         }
         stage('ACR Login') {
@@ -40,8 +43,8 @@ pipeline {
         }
 		stage('ACR Push') {
             steps {
-                sh 'docker tag java_proj ksarkar23987.azurecr.io/test-repo:test-tag'
-				sh 'docker push ksarkar23987.azurecr.io/test-repo:test-tag'
+                sh 'docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${ACR_NAME}.azurecr.io/${ACR_REPO}:${IMAGE_TAG}'
+				sh 'docker push ${ACR_NAME}.azurecr.io/${ACR_REPO}:${IMAGE_TAG}'
             }
         }
 		stage('AKS Login') {
@@ -62,13 +65,25 @@ pipeline {
                 sh '''
                     if kubectl get deployment ${IMAGE_NAME} -n ${NAMESPACE}; then
                         echo "Deployment exists. Updating image..."
-                        kubectl set image deployment/${IMAGE_NAME} ${IMAGE_NAME}=${ACR_NAME}/${IMAGE_NAME}:${IMAGE_TAG} -n ${NAMESPACE}
+                        kubectl set image deployment/${IMAGE_NAME} ${ACR_REPO}=${ACR_NAME}.azurecr.io/${ACR_REPO}:${IMAGE_TAG} -n ${NAMESPACE}
                     else
                         echo "Creating new deployment..."
-                        kubectl create deployment ${IMAGE_NAME} --image=${ACR_NAME}/${IMAGE_NAME}:${IMAGE_TAG} -n ${NAMESPACE}
+                        kubectl create deployment ${IMAGE_NAME} --image=${ACR_NAME}.azurecr.io/${ACR_REPO}:${IMAGE_TAG} -n ${NAMESPACE}
                     fi
                 '''
                 sh 'kubectl rollout status deployment/${IMAGE_NAME} -n ${NAMESPACE}'
+            }
+        }
+		stage('Expose the app') {
+            steps {
+                sh '''
+                    if kubectl get service java-app-lb -n default > /dev/null 2>&1; then
+                        echo "Service already exists. Skipping expose."
+                    else
+                        kubectl expose deployment java-app --type=LoadBalancer --name=${ACR_LOADBALANCER} -n default --port=80 --target-port=8080
+                    fi
+                '''
+                sh 'kubectl get svc ${ACR_LOADBALANCER} -n default'
             }
         }
     }
