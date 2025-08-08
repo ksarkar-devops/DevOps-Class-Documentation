@@ -83,6 +83,7 @@ pipeline {
                         kubectl expose deployment java-app --type=LoadBalancer --name=${ACR_LOADBALANCER} -n default --port=80 --target-port=8080
                     fi
                 '''
+				sh 'sleep 30'
                 sh 'kubectl get svc ${ACR_LOADBALANCER} -n default'
             }
         }
