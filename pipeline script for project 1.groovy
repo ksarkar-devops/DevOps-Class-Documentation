@@ -67,10 +67,10 @@ pipeline {
                 sh '''
                     if kubectl get deployment ${IMAGE_NAME} -n ${NAMESPACE}; then
                         echo "Deployment exists. Updating image..."
-                        kubectl set image deployment/${IMAGE_NAME} ${ACR_REPO}=${ACR_NAME}.azurecr.io/${ACR_REPO}:${IMAGE_TAG} -n ${NAMESPACE}
+                        kubectl set image deployment/${IMAGE_NAME} ${IMAGE_NAME}=${ACR_NAME}.azurecr.io/${IMAGE_NAME}:${IMAGE_TAG} -n ${NAMESPACE}
                     else
                         echo "Creating new deployment..."
-                        kubectl create deployment ${IMAGE_NAME} --image=${ACR_NAME}.azurecr.io/${ACR_REPO}:${IMAGE_TAG} -n ${NAMESPACE}
+                        kubectl create deployment ${IMAGE_NAME} --image=${ACR_NAME}.azurecr.io/${IMAGE_NAME}:${IMAGE_TAG} -n ${NAMESPACE}
                     fi
                 '''
                 sh 'kubectl rollout status deployment/${IMAGE_NAME} -n ${NAMESPACE}'
