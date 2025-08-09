@@ -44,7 +44,7 @@ pipeline {
                 }
             }
         }
-		stage('ACR Push') {
+		stage('Docker Push to ACR') {
             steps {
                 sh 'docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${ACR_NAME}.azurecr.io/${ACR_REPO}:${IMAGE_TAG}'
 				sh 'docker push ${ACR_NAME}.azurecr.io/${ACR_REPO}:${IMAGE_TAG}'
