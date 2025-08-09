@@ -77,7 +77,7 @@ pipeline {
 		stage('Expose the app') {
             steps {
                 sh '''
-                    if kubectl get service java-app-lb -n default > /dev/null 2>&1; then
+                    if kubectl get service ${ACR_LOADBALANCER} -n default > /dev/null 2>&1; then
                         echo "Service already exists. Skipping expose."
                     else
                         kubectl expose deployment java-app --type=LoadBalancer --name=${ACR_LOADBALANCER} -n default --port=80 --target-port=8080
