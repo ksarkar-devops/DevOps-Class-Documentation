@@ -2,14 +2,17 @@ pipeline {
     agent any
     
     environment {
-    IMAGE_NAME = 'java-app'
-    IMAGE_TAG = 'test-tag'
-    ACR_NAME = 'ksarkar23987'
-    ACR_REPO = 'test-repo'
-    CLUSTER_NAME = 'kube-cluster'
-    NAMESPACE = 'default'
-    ACR_LOADBALANCER = 'java-app-lb'
-}
+	    IMAGE_NAME = 'java-app'
+	    IMAGE_TAG = 'test-tag'
+	    ACR_NAME = 'ksarkar23987'
+	    ACR_REPO = 'test-repo'
+	    CLUSTER_NAME = 'kube-cluster'
+	    NAMESPACE = 'default'
+	    ACR_LOADBALANCER = 'java-app-lb'
+		PIPELINE_NAME = 'DeployJavaProject'
+		AZURE_SUBSCRIPTION_ID = '719c1e53-b3fd-4af0-99f9-46469a324ca7'
+		AZURE_RESOURCE_GROUP = 'rg'
+	}
 
     stages {
         stage('Clone repo') {
@@ -19,7 +22,7 @@ pipeline {
         }
 		stage('List files') {
             steps {
-				sh 'cd /var/lib/jenkins/workspace/DeployJavaProject/'
+				sh 'cd /var/lib/jenkins/workspace/${PIPELINE_NAME}/'
 				sh 'ls -l'
             }
         }
@@ -30,14 +33,14 @@ pipeline {
         }
 		stage('Docker build') {
             steps {
-                sh 'cd /var/lib/jenkins/workspace/DeployJavaProject/'
+                sh 'cd /var/lib/jenkins/workspace/${PIPELINE_NAME}/'
 				sh 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .'
             }
         }
         stage('ACR Login') {
             steps {
 				withCredentials([usernamePassword(credentialsId: 'acr-login', usernameVariable: 'ACR_USER', passwordVariable: 'ACR_PASS')]) {
-                    sh 'echo "$ACR_PASS" | docker login ksarkar23987.azurecr.io --username "$ACR_USER" --password-stdin'
+                    sh 'echo "$ACR_PASS" | docker login ${ACR_NAME}.azurecr.io --username "$ACR_USER" --password-stdin'
                 }
             }
         }
@@ -50,8 +53,8 @@ pipeline {
 		stage('AKS Login') {
             steps {
                 sh 'az login --identity'
-                sh 'az account set --subscription 719c1e53-b3fd-4af0-99f9-46469a324ca7'
-				sh 'az aks get-credentials --resource-group rg --name kube-cluster --overwrite-existing'
+                sh 'az account set --subscription ${AZURE_SUBSCRIPTION_ID}'
+				sh 'az aks get-credentials --resource-group ${AZURE_RESOURCE_GROUP} --name ${CLUSTER_NAME} --overwrite-existing'
             }
         }
 		stage('Confirm after AKS Login') {
@@ -77,14 +80,14 @@ pipeline {
 		stage('Expose the app') {
             steps {
                 sh '''
-                    if kubectl get service ${ACR_LOADBALANCER} -n default > /dev/null 2>&1; then
+                    if kubectl get service ${ACR_LOADBALANCER} -n ${NAMESPACE} > /dev/null 2>&1; then
                         echo "Service already exists. Skipping expose."
                     else
-                        kubectl expose deployment java-app --type=LoadBalancer --name=${ACR_LOADBALANCER} -n default --port=80 --target-port=8080
+                        kubectl expose deployment ${IMAGE_NAME} --type=LoadBalancer --name=${ACR_LOADBALANCER} -n ${NAMESPACE} --port=80 --target-port=8080
                     fi
                 '''
 				sh 'sleep 30'
-                sh 'kubectl get svc ${ACR_LOADBALANCER} -n default'
+                sh 'kubectl get svc ${ACR_LOADBALANCER} -n ${NAMESPACE}'
             }
         }
     }
