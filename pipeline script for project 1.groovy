@@ -3,9 +3,8 @@ pipeline {
     
     environment {
 	    IMAGE_NAME = 'java-app'
-	    IMAGE_TAG = 'test-tag'
+	    IMAGE_TAG = 'latest'
 	    ACR_NAME = 'ksarkar23987'
-	    ACR_REPO = 'test-repo'
 	    CLUSTER_NAME = 'kube-cluster'
 	    NAMESPACE = 'default'
 	    ACR_LOADBALANCER = 'java-app-lb'
@@ -46,8 +45,8 @@ pipeline {
         }
 		stage('Docker Push to ACR') {
             steps {
-                sh 'docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${ACR_NAME}.azurecr.io/${ACR_REPO}:${IMAGE_TAG}'
-				sh 'docker push ${ACR_NAME}.azurecr.io/${ACR_REPO}:${IMAGE_TAG}'
+                sh 'docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${ACR_NAME}.azurecr.io/${IMAGE_NAME}:${IMAGE_TAG}'
+				sh 'docker push ${ACR_NAME}.azurecr.io/${IMAGE_NAME}:${IMAGE_TAG}'
             }
         }
 		stage('AKS Login') {
