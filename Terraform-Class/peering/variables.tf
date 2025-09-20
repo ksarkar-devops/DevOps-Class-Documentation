@@ -4,19 +4,72 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
-variable "vpc1" {
-  type        = object({
-    name           = string
-    cidr_block     = string
-  })
+variable "vpcs" {
+  type = map(object({
+    cidr_block = string
+  }))
+
   default = {
-      name           = "AppSn"
-      cidr_block     = "172.21.10.0/24"
+    vpc1 = {
+      cidr_block = "10.0.0.0/16"
     }
+    vpc2 = {
+      cidr_block = "10.1.0.0/16"
+    }
+  }
 }
 
-variable "app_subnet_cidr" {
-  description = "CIDR block for the App subnet"
-  type        = string
-  default     = "172.20.10.0/24"
+variable "subnets" {
+  type = map(object({
+    cidr_block = string
+    vpc_id     = string
+
+  }))
+
+  default = {
+    subnet1 = {
+      cidr_block = "10.0.1.0/24"
+      vpc_id     = "vpc1"
+    }
+    subnet2 = {
+      cidr_block = "10.1.1.0/24"
+      vpc_id     = "vpc2"
+    }
+  }
+}
+
+variable "igws" {
+  type = map(object({
+    vpc_id = string
+  }))
+
+  default = {
+    igw1 = {
+      vpc_id     = "vpc1"
+    }
+    igw2 = {
+      vpc_id     = "vpc2"
+    }
+  }
+}
+
+variable "rts" {
+  type = map(object({
+    vpc_id     = string
+    cidr_block = string
+    gateway_id = string
+  }))
+
+  default = {
+    rts1 = {
+      vpc_id     = "vpc1"
+      cidr_block = "0.0.0.0/0"
+      gateway_id = "igw1"
+    }
+    rts1 = {
+      vpc_id     = "vpc2"
+      cidr_block = "0.0.0.0/0"
+      gateway_id = "igw2"
+    }
+  }
 }
