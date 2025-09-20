@@ -50,3 +50,16 @@ variable "rts" {
     rts2 = { vpc_key = "vpc2", gateway_key = "igw2" }
   }
 }
+
+variable "peering_connections" {
+  type = map(object({
+    requester_vpc_key = string
+    accepter_vpc_key  = string
+    auto_accept       = bool
+  }))
+
+  default = {
+    pcx1 = { requester_vpc_key = "vpc1", accepter_vpc_key  = "vpc2", auto_accept = true }
+    pcx2 = { requester_vpc_key = "vpc2", accepter_vpc_key  = "vpc1", auto_accept = true }
+  }
+}
