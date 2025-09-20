@@ -32,9 +32,18 @@ resource "aws_route_table" "rt" {
   }
 }
 
-# Associate Route Tables with Subnets
+# Associate Route Tables with Subnets (dynamic now)
 resource "aws_route_table_association" "rta" {
   for_each = var.subnets
   subnet_id      = aws_subnet.subnet[each.key].id
-  route_table_id = aws_route_table.rt["rts${substr(each.key, 6, 1)}"].id
+  route_table_id = aws_route_table.rt[each.value.route_table_key].id
 }
+
+# Create VPC Peering Connections
+# resource "aws_vpc_peering_connection" "pcx" {
+#   for_each = var.peering_connections
+
+#   vpc_id        = aws_vpc.vpc[each.value.requester_vpc_key].id
+#   peer_vpc_id   = aws_vpc.vpc[each.value.accepter_vpc_key].id
+#   auto_accept   = each.value.auto_accept
+# }

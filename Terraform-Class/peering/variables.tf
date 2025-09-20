@@ -17,13 +17,14 @@ variable "vpcs" {
 
 variable "subnets" {
   type = map(object({
-    cidr_block = string
-    vpc_key    = string  # reference VPC by key
+    cidr_block      = string
+    vpc_key         = string  # reference VPC by key
+    route_table_key = string  # reference Route Table by key
   }))
 
   default = {
-    subnet1 = { cidr_block = "10.0.1.0/24", vpc_key = "vpc1" }
-    subnet2 = { cidr_block = "10.1.1.0/24", vpc_key = "vpc2" }
+    subnet1 = { cidr_block = "10.0.1.0/24", vpc_key = "vpc1", route_table_key = "rts1" }
+    subnet2 = { cidr_block = "10.1.1.0/24", vpc_key = "vpc2", route_table_key = "rts2" }
   }
 }
 
