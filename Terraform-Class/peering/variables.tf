@@ -10,64 +10,42 @@ variable "vpcs" {
   }))
 
   default = {
-    vpc1 = {
-      cidr_block = "10.0.0.0/16"
-    }
-    vpc2 = {
-      cidr_block = "10.1.0.0/16"
-    }
+    vpc1 = { cidr_block = "10.0.0.0/16" }
+    vpc2 = { cidr_block = "10.1.0.0/16" }
   }
 }
 
 variable "subnets" {
   type = map(object({
     cidr_block = string
-    vpc_id     = string
-
+    vpc_key    = string  # reference VPC by key
   }))
 
   default = {
-    subnet1 = {
-      cidr_block = "10.0.1.0/24"
-      vpc_id     = "vpc1"
-    }
-    subnet2 = {
-      cidr_block = "10.1.1.0/24"
-      vpc_id     = "vpc2"
-    }
+    subnet1 = { cidr_block = "10.0.1.0/24", vpc_key = "vpc1" }
+    subnet2 = { cidr_block = "10.1.1.0/24", vpc_key = "vpc2" }
   }
 }
 
 variable "igws" {
   type = map(object({
-    vpc_id = string
+    vpc_key = string
   }))
 
   default = {
-    igw1 = {
-      vpc_id     = "vpc1"
-    }
-    igw2 = {
-      vpc_id     = "vpc2"
-    }
+    igw1 = { vpc_key = "vpc1" }
+    igw2 = { vpc_key = "vpc2" }
   }
 }
 
 variable "rts" {
   type = map(object({
-    vpc_id     = string
-    cidr_block = string
-    gateway_id = string
+    vpc_key     = string
+    gateway_key = string
   }))
 
   default = {
-    rts1 = {
-      vpc_id     = "vpc1"
-      gateway_id = "igw1"
-    }
-    rts2 = {
-      vpc_id     = "vpc2"
-      gateway_id = "igw2"
-    }
+    rts1 = { vpc_key = "vpc1", gateway_key = "igw1" }
+    rts2 = { vpc_key = "vpc2", gateway_key = "igw2" }
   }
 }
