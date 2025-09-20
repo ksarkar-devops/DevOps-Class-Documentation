@@ -63,12 +63,10 @@ variable "rts" {
   default = {
     rts1 = {
       vpc_id     = "vpc1"
-      cidr_block = "0.0.0.0/0"
       gateway_id = "igw1"
     }
-    rts1 = {
+    rts2 = {
       vpc_id     = "vpc2"
-      cidr_block = "0.0.0.0/0"
       gateway_id = "igw2"
     }
   }
