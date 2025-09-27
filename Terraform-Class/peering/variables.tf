@@ -1,18 +1,12 @@
 variable "aws_region" {
   description = "AWS region to deploy resources in"
   type        = string
-  default     = "us-east-1"
 }
 
 variable "vpcs" {
   type = map(object({
     cidr_block = string
   }))
-
-  default = {
-    vpc1 = { cidr_block = "10.0.0.0/16" }
-    vpc2 = { cidr_block = "10.1.0.0/16" }
-  }
 }
 
 variable "subnets" {
@@ -21,34 +15,19 @@ variable "subnets" {
     vpc_key         = string  # reference VPC by key
     route_table_key = string  # reference Route Table by key
   }))
-
-  default = {
-    subnet1 = { cidr_block = "10.0.1.0/24", vpc_key = "vpc1", route_table_key = "rts1" }
-    subnet2 = { cidr_block = "10.1.1.0/24", vpc_key = "vpc2", route_table_key = "rts2" }
-  }
 }
 
-variable "igws" {
+variable "internet_gateways" {
   type = map(object({
     vpc_key = string
   }))
-
-  default = {
-    igw1 = { vpc_key = "vpc1" }
-    igw2 = { vpc_key = "vpc2" }
-  }
 }
 
-variable "rts" {
+variable "route_tables" {
   type = map(object({
     vpc_key     = string
     gateway_key = string
   }))
-
-  default = {
-    rts1 = { vpc_key = "vpc1", gateway_key = "igw1" }
-    rts2 = { vpc_key = "vpc2", gateway_key = "igw2" }
-  }
 }
 
 variable "peering_connections" {
@@ -57,9 +36,4 @@ variable "peering_connections" {
     accepter_vpc_key  = string
     auto_accept       = bool
   }))
-
-  default = {
-    pcx1 = { requester_vpc_key = "vpc1", accepter_vpc_key  = "vpc2", auto_accept = true }
-    pcx2 = { requester_vpc_key = "vpc2", accepter_vpc_key  = "vpc1", auto_accept = true }
-  }
 }

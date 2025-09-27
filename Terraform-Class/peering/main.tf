@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 # Create VPCs
-resource "aws_vpc" "vpc" {
+resource "aws_vpc" "main" {
   for_each   = var.vpcs
   cidr_block = each.value.cidr_block
 
@@ -13,9 +13,9 @@ resource "aws_vpc" "vpc" {
 }
 
 # Create Subnets
-resource "aws_subnet" "subnet" {
+resource "aws_subnet" "main" {
   for_each   = var.subnets
-  vpc_id     = aws_vpc.vpc[each.value.vpc_key].id
+  vpc_id     = aws_vpc.main[each.value.vpc_key].id
   cidr_block = each.value.cidr_block
 
   tags = {
@@ -24,9 +24,9 @@ resource "aws_subnet" "subnet" {
 }
 
 # Create Internet Gateways
-resource "aws_internet_gateway" "igw" {
-  for_each = var.igws
-  vpc_id   = aws_vpc.vpc[each.value.vpc_key].id
+resource "aws_internet_gateway" "main" {
+  for_each = var.internet_gateways
+  vpc_id   = aws_vpc.main[each.value.vpc_key].id
 
   tags = {
     Name = each.key
@@ -34,13 +34,13 @@ resource "aws_internet_gateway" "igw" {
 }
 
 # Create Route Tables
-resource "aws_route_table" "rt" {
-  for_each = var.rts
+resource "aws_route_table" "main" {
+  for_each = var.route_tables
   vpc_id   = aws_vpc.vpc[each.value.vpc_key].id
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw[each.value.gateway_key].id
+    gateway_id = aws_internet_gateway.main[each.value.gateway_key].id
   }
 
   tags = {
@@ -49,18 +49,17 @@ resource "aws_route_table" "rt" {
 }
 
 # Associate Route Tables with Subnets
-resource "aws_route_table_association" "rta" {
+resource "aws_route_table_association" "main" {
   for_each = var.subnets
-  subnet_id      = aws_subnet.subnet[each.key].id
-  route_table_id = aws_route_table.rt[each.value.route_table_key].id
+  subnet_id      = aws_subnet.main[each.key].id
+  route_table_id = aws_route_table.main[each.value.route_table_key].id
 }
 
 # Create VPC Peering Connections
-resource "aws_vpc_peering_connection" "pcx" {
+resource "aws_vpc_peering_connection" "main" {
   for_each = var.peering_connections
-
-  vpc_id      = aws_vpc.vpc[each.value.requester_vpc_key].id
-  peer_vpc_id = aws_vpc.vpc[each.value.accepter_vpc_key].id
+  vpc_id      = aws_vpc.main[each.value.requester_vpc_key].id
+  peer_vpc_id = aws_vpc.main[each.value.accepter_vpc_key].id
   auto_accept = each.value.auto_accept
 
   tags = {
