@@ -36,7 +36,7 @@ resource "aws_internet_gateway" "main" {
 # Create Route Tables
 resource "aws_route_table" "main" {
   for_each = var.route_tables
-  vpc_id   = aws_vpc.vpc[each.value.vpc_key].id
+  vpc_id   = aws_vpc.main[each.value.vpc_key].id
 
   route {
     cidr_block = "0.0.0.0/0"
