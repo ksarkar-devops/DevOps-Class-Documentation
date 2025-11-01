@@ -31,8 +31,7 @@ module "storage_account" {
 source = "./modules/storage-account"
 resource_group_name = module.resource_group.resource_group_name
 location = module.resource_group.resource_group_location
-storage_account_name =
-"${local.project_name}${local.environment}sa001"
+storage_account_name = "${local.project_name}${local.environment}sa001"
 account_tier = "Standard"
 account_replication_type = "LRS"
 environment = local.environment
